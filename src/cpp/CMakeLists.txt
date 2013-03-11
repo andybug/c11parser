@@ -6,5 +6,5 @@ PROJECT (C11PARSER)
 # ADD_LIBRARY ()
 
 # create c11 preprocessor executable
-# ADD_EXECUTABLE ()
+ADD_EXECUTABLE (c11-cpp main.c)
 
