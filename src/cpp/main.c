@@ -1,11 +1,13 @@
+/* 
+ * main.c
+ * Entry point for the C11 CPP executable
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <unistd.h>
 #include "cpp.h"
-
-struct cpp_options options;
 
 static void print_usage(void)
 {
@@ -61,5 +63,7 @@ int main(int argc, char *argv[])
 	const char *filename;
 	
 	read_args(argc, argv, &filename);
+	cpp_preprocess(filename, 0, stdout);
+
 	return 0;
 }
