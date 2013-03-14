@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 PROJECT (C11PARSER)
 
 # create c11 preprocessor library (libcpp)
-ADD_LIBRARY (cpp cpp.c)
+ADD_LIBRARY (cpp cpp.c lex.c)
 
 # create c11 preprocessor executable
 ADD_EXECUTABLE (c11-cpp main.c)
