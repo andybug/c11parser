@@ -18,7 +18,7 @@ int cpp_preprocess(const char *filename, int options, FILE *outstream);
 /* --------------------- token definitions --------------------------------- */
 
 enum token_type {
-	CPP_TOKEN_UNDEF = 0,
+	CPP_TOKEN_NONE = 0,
 
 	/* generic */
 	CPP_TOKEN_HEADER_NAME,
@@ -28,23 +28,38 @@ enum token_type {
 	CPP_TOKEN_STRING_LITERAL,
 	CPP_TOKEN_PUNCTUATOR,
 
-	/* specific */
-	CPP_TOKEN_POUND
+	CPP_TOKEN_NEWLINE
 };
 
-#define CPP_EXPECT_WHITESPACE		0x1
-#define CPP_EXPECT_POUND		0x2
-#define CPP_EXPECT_DIRECTIVE		0x4
+struct lex_token {
+	size_t begin;
+	size_t end;
+	enum token_type type;
+
+	struct lex_token *next;
+	struct lex_token *prev;
+};
+
+#define LEX_HANDLE_BEGIN		0x1
+#define LEX_HANDLE_CONT			0x2
+#define LEX_HANDLE_END			0x4
 
 struct lex_context {
-	/* tokens */
-	size_t token_begin;
-	size_t token_end;
-	enum token_type token_type;
+	/* token list */
+	struct lex_token *head;
+	struct lex_token *tail;
+	
+	/* the current token being processed */
+	struct lex_token token;
+	int (*handler)(struct lex_context *lex, int mode, int c);
 
-	/* line context */
-	unsigned long expected;
-	bool ignore_whitespace;
+	/* index into cpp_context line of the current char being processed */
+	size_t index;
+
+	/* flags */
+	bool octal;
+	bool hex;
+	bool decimal;
 };
 
 /* --------------------- parsing context ----------------------------------- */
@@ -65,7 +80,12 @@ struct cpp_context {
 
 /* --------------------- lexing -------------------------------------------- */
 
-int lex_next_token(struct cpp_context *ctx);
+#define LEX_TOKEN_SUCCESS	1
+#define LEX_TOKEN_ENDLINE	2
+#define LEX_TOKEN_ENDFILE	3
+#define LEX_TOKEN_ERROR		4
+
+int lex_token(struct cpp_context *ctx);
 
 /* --------------------- program options ----------------------------------- */
 

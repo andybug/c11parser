@@ -18,6 +18,7 @@ static int read_line(struct cpp_context *ctx, FILE *stream)
 		return 0;
 
 	ctx->line_len = strlen(ctx->line);
+	memset(&ctx->lex, 0, sizeof(struct lex_context));
 
 	return 1;
 }
@@ -26,6 +27,7 @@ int cpp_preprocess(const char *filename, int options, FILE *outstream)
 {
 	FILE *instream;
 	struct cpp_context ctx;
+	struct lex_token *token;
 
 	memset(&ctx, 0, sizeof(struct cpp_context));
 
@@ -34,12 +36,18 @@ int cpp_preprocess(const char *filename, int options, FILE *outstream)
 		return -1;
 
 	while (read_line(&ctx, instream)) {
-		if (lex_next_token(&ctx) == 0) {
-			fprintf(outstream, "found '#' in %s", ctx.line);
+		lex_token(&ctx);
+		while (ctx.lex.token.type != CPP_TOKEN_NEWLINE) {
+			if (ctx.lex.token.type == CPP_TOKEN_IDENTIFIER) {
+				printf("identifier: '%.*s'\n",
+						ctx.lex.token.end -
+						ctx.lex.token.begin,
+						ctx.line + ctx.lex.token.begin);
+			}
+			lex_token(&ctx);
+
 		}
 
-		/* reset lexing context */
-		memset(&ctx.lex, 0, sizeof(struct lex_context));
 	}
 
 	fclose(instream);
